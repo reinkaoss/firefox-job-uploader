@@ -15,33 +15,21 @@ async function fillPlatformPage(jobData) {
     const createBtn = await waitForElement('[data-cy-id="create-job"]', 15000);
     console.log("Found create-job button:", createBtn);
     createBtn.click();
-    await sleep(2000);
+    // await sleep(2000);
+
 
     // 2) Fill job title
     const titleInput = await waitForElement('input[name="job-name-txt"]', 10000);
     fillInput(titleInput, jobData.title);
     console.log("Title filled with:", jobData.title);
-    await sleep(1000);
+    // await sleep(1000);
 
     // 3) Submit "Create Job"
     const createJobSubmit = await waitForElement('[data-cy-id="create-job-submit"]', 10000);
     createJobSubmit.click();
     console.log("Clicked create job submit!");
-    await sleep(3000);
+    // await sleep(3000);
 
-    // // 4) Apply link
-    // const applyLinkRadio = await waitForElement('input[type="radio"][value="redirect"]', 5000);
-    // if (!applyLinkRadio.checked) {
-    //   applyLinkRadio.click();
-    //   console.log('Checked the "Apply Link" radio button');
-    // }
-    // await sleep(500);    
-
-    // // 4.1) Apply link
-    // const applyLinkInput = await waitForElement('input[name="jobRedirect"]', 10000);
-    // fillInput(applyLinkInput, jobData.applyLink);
-    // console.log("Apply link filled with:", jobData.applyLink);
-    // await sleep(1000);
 
     // Check if the apply link is an email address
 const isEmail = (str) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
@@ -297,7 +285,7 @@ await handleLocations(jobData);
             await sleep(500);
     
             // 2️ Match job type to its index in dropdown
-            const jobTypeOptions = [ "Internship (1 Month+)", "Placement (10 Months+)", "Graduate Job", "Graduate Scheme", "Level 2 Apprenticeship", "Level 3 Apprenticeship", "Higher Apprenticeship", "Degree Apprenticeship", "School Leaver Programme", "Work Experience", "Insight/Vacation Scheme (< 4 Weeks)", "Insight Day" ];
+            const jobTypeOptions = [ "Internship (1 Month+)", "Placement (10 Months+)", "Graduate Job", "Graduate Scheme", "Level 2 Apprenticeship", "Level 3 Apprenticeship", "Higher Level Apprenticeship", "Degree Apprenticeship", "School Leaver Programme", "Work Experience", "Insight/Vacation Scheme (< 4 Weeks)", "Insight Day" ];
             const lowerCaseJobType = jobType.toLowerCase();
     
             let targetIndex = jobTypeOptions.findIndex(option =>
@@ -496,7 +484,7 @@ await handleLocations(jobData);
         // Click the button
         contentButton.click();
         console.log('✅ Successfully clicked Content tab');
-        await sleep(1000); // Wait for tab content to load
+        await sleep(200); // Wait for tab content to load
     
       } catch (error) {
         console.error('❌ Error clicking Content tab:', error);
@@ -506,23 +494,22 @@ await handleLocations(jobData);
     // Usage
     await navigateToContentTab();    
     
-    // PASTE JOB DESCRIPTION 
+    // // // PASTE JOB DESCRIPTION 
     async function setJobDescription(description) {
       try {
         // Find the editor div
-        const editor = document.querySelector('.ql-editor');
+        const editor = document.querySelector('#textEditor .ql-editor');
         if (!editor) {
           throw new Error('Editor element not found');
         }
-    
         // Append the "How to apply" section to the description
         const fullDescription = `${description}\n\n<h3>How to apply</h3>To apply for this role and to find out more, please click on the apply button.\n\nPlease note that applications may close before the application deadline, so apply early to avoid disappointment.`;
-    
         // Set the content and remove the ql-blank class
         editor.innerHTML = fullDescription;
         editor.classList.remove('ql-blank');
         
         console.log('✅ Successfully set job description');
+        // console.log('Job description:', fullDescription);
         await sleep(500); // Small delay to ensure content is set
     
       } catch (error) {
@@ -530,41 +517,399 @@ await handleLocations(jobData);
       }
     }
 
-        // Usage
         await setJobDescription(jobData.description);
         await handleJobUpdate(); 
 
-    // SAVE URL VALUES
-    async function extractPreviewLinks() {
-      try {
-          const previewButtons = document.querySelectorAll('.preview-button');
-          let previewUrls = [];
-  
-          previewButtons.forEach(button => {
-              previewUrls.push(button.href);
-          });
-  
-          if (previewUrls.length > 0) {
-              console.log("Extracted preview URLs:", previewUrls);
-  
-              // Send preview URLs back to the extension
-              chrome.runtime.sendMessage({ action: "storePreviewUrls", urls: previewUrls });
-          }
-  
-      } catch (err) {
-          console.error("Error extracting preview links:", err);
-      }
-  }
-  
-  extractPreviewLinks();
-  
 
+
+        //---------------------------------------------------------
+        // SETTING JOBS LIVE
+        //---------------------------------------------------------
+
+// SAVE URL VALUES & SHOW IN MODAL WITH COPY BUTTON
+// async function extractPreviewLinks() {
+//   try {
+//     const previewButtons = document.querySelectorAll('.preview-button');
+//     const previewUrls = Array.from(previewButtons).map(button => button.href);
+
+//     if (previewUrls.length === 0) {
+//       console.warn("No preview URLs found.");
+//       return;
+//     }
+
+//     console.log("Extracted preview URLs:", previewUrls);
+
+//     // Send preview URLs back to the extension
+//     chrome.runtime.sendMessage({ action: "storePreviewUrls", urls: previewUrls });
+
+//     // Create modal
+//     const modal = document.createElement("div");
+//     modal.style.position = "fixed";
+//     modal.style.top = "50%";
+//     modal.style.left = "50%";
+//     modal.style.transform = "translate(-50%, -50%)";
+//     modal.style.background = "white";
+//     modal.style.border = "2px solid black";
+//     modal.style.padding = "20px";
+//     modal.style.zIndex = "9999";
+//     modal.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
+//     modal.style.fontSize = "16px";
+//     modal.style.fontFamily = "sans-serif";
+//     modal.style.borderRadius = "10px";
+//     modal.style.maxHeight = "400px";
+//     modal.style.overflowY = "auto";
+
+//     const heading = document.createElement("div");
+//     heading.style.fontWeight = "bold";
+//     heading.style.marginBottom = "10px";
+//     heading.textContent = "Stored URLs:";
+
+//     const list = document.createElement("textarea");
+//     list.value = previewUrls.join("\n");
+//     list.readOnly = true;
+//     list.style.width = "100%";
+//     list.style.height = "200px";
+//     list.style.marginBottom = "10px";
+
+//     const copyBtn = document.createElement("button");
+//     copyBtn.textContent = "Copy All URLs";
+//     copyBtn.style.padding = "6px 10px";
+//     copyBtn.style.cursor = "pointer";
+//     copyBtn.addEventListener("click", () => {
+//       list.select();
+//       document.execCommand("copy");
+//       copyBtn.textContent = "Copied!";
+//       setTimeout(() => (copyBtn.textContent = "Copy All URLs"), 2000);
+//     });
+
+//     const closeBtn = document.createElement("button");
+//     closeBtn.textContent = "Close";
+//     closeBtn.style.marginLeft = "10px";
+//     closeBtn.style.padding = "6px 10px";
+//     closeBtn.style.cursor = "pointer";
+//     closeBtn.addEventListener("click", () => {
+//       modal.remove();
+//     });
+
+//     modal.appendChild(heading);
+//     modal.appendChild(list);
+//     modal.appendChild(copyBtn);
+//     modal.appendChild(closeBtn);
+
+//     document.body.appendChild(modal);
+//   } catch (err) {
+//     console.error("Error extracting preview links:", err);
+//   }
+// }
+
+// extractPreviewLinks();
+
+// Set job Live
+async function setJobLiveFromContentPage() {
+  try {
+    console.log("🚀 Starting process to set job live from content page");
+
+    // 1️⃣ Extract Job ID from current URL
+    const url = window.location.href;
+    const match = url.match(/\/jobs\/(\d+)/);
+    if (!match || !match[1]) {
+      console.error("❌ Could not extract Job ID from URL");
+      return;
+    }
+    const jobId = match[1];
+    window.jobId = jobId; // Save jobId globally
+    console.log("✅ Extracted Job ID:", jobId);
+
+    // 2️⃣ Click the "Campaigns" tab
+    const campaignsTab = await waitForXPath('/html/body/div[1]/div/div/div[1]/div/div/div[3]/a[1]', 10000, el => el.innerText.trim() === "Campaigns");
+    campaignsTab.click();
+    console.log("✅ Clicked Campaigns tab");
+    await sleep(1000);
+
+    // 3️⃣ Click the campaign name link (first one)
+    const campaignLink = await waitForElement("tbody.v-data-table__tbody td a[href*='campaigns']", 10000);
+    campaignLink.click();
+    console.log("✅ Clicked Campaign link");
+    await sleep(2000);
+
+    // 4️⃣ Expand the correct section (e.g., job list or settings)
+    const expansionOverlay = await waitForElement(".v-expansion-panel-title__overlay", 10000);
+    expansionOverlay.click();
+    console.log("✅ Clicked expansion panel overlay");
+  
+  } catch (err) {
+    console.error("❌ Error in setJobLiveFromContentPage:", err);
+  }
+}
+
+// Utility sleep (already used in your project)
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+await setJobLiveFromContentPage();
+
+// SELECT JOB LISTING TAB
+
+async function selectJobListingTab(jobType) {
+  try {
+    console.log("Selecting job listing tab for job type:", jobType);
+    let tabText = "";
     
+    // Use "startsWith" for graduate; "includes" for the others.
+    if (jobType.startsWith("graduate")) {
+      tabText = "Graduate Job Listing";
+    } else if (jobType.includes("Apprenticeship") || jobType.includes("Internship") || jobType.includes("Placement")) {
+      tabText = "Undergraduate Job Listing";
+    } else if (jobType.includes("School") || jobType.includes("Leaver")) {
+      tabText = "School Leaver Job Listing";
+    } else {
+      console.log(jobType);
+      console.warn("Unknown job type. Defaulting to Graduate Job Listing.");
+      tabText = "Graduate Job Listing";
+    }
+    
+    console.log("Tab text determined:", tabText);
+    
+    // Get all ServiceHeader elements that have a child with class 'unbooked'
+    const serviceHeaders = Array.from(document.querySelectorAll(".ServiceHeader"))
+      .filter(header => header.querySelector(".unbooked"));
+
+    if (serviceHeaders.length === 0) {
+      console.warn("No ServiceHeader elements with class 'unbooked' found.");
+    } else {
+      console.log("Found", serviceHeaders.length, "ServiceHeader elements with class 'unbooked':");
+      serviceHeaders.forEach((header, index) => {
+        // Get all spans in the header that are not marked as ServiceAttributes
+        const spans = header.querySelectorAll("span:not(.ServiceAttributes)");
+        const spanTexts = Array.from(spans).map(span => span.innerText.trim()).filter(text => text.length > 0);
+        console.log("ServiceHeader " + index + ":", spanTexts.join(" | "));
+      });
+    }
+
+    let found = false;
+    serviceHeaders.forEach(header => {
+      // Look for spans that might contain the target text
+      const spans = header.querySelectorAll("span:not(.ServiceAttributes)");
+      spans.forEach(span => {
+        if (span.innerText && span.innerText.trim().toLowerCase().includes(tabText.toLowerCase())) {
+          header.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+          header.click();
+          console.log("Clicked ServiceHeader with text:", span.innerText.trim());
+          found = true;
+        }
+      });
+    });
+    await sleep(500);
+    if (!found) {
+      console.error("Could not find a ServiceHeader with text containing:", tabText);
+    }
+  } catch (err) {
+    console.error("Error selecting job listing tab:", err);
+  }
+}
+
+// Example usage:
+await selectJobListingTab(jobData.jobType);
+
+
+// CAMPAIGN DROPDOWN AND DATES
+// OLD FUNCTION
+
+async function setNewJobBooking(jobData) {
+  try {
+    const jobId = window.jobId;
+    console.log("Starting setNewJobBooking with jobId:", jobId);
+
+    const dropdownInput = document.querySelector('input[title="Open"]');
+    if (!dropdownInput) {
+      console.error('No input found with title="Open"');
+      return;
+    }
+
+    // Scroll into view
+    dropdownInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    await sleep(1000);
+
+    // Click it
+    dropdownInput.click();
+    await sleep(500);
+    dropdownInput.click();
+    dropdownInput.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    console.log('Clicked the input with title="Open"');
+
+    // 3) Wait for .v-list-item to appear
+    let dropdownOptions = document.querySelectorAll('.v-list-item');
+    let attempts = 0;
+    while (dropdownOptions.length === 0 && attempts < 5) {
+      await sleep(500);
+      dropdownOptions = document.querySelectorAll('.v-list-item');
+      attempts++;
+    }
+    if (dropdownOptions.length === 0) {
+      console.error("No dropdown items found for Select New Job.");
+      return;
+    }
+    console.log("Found", dropdownOptions.length, "dropdown items in Select New Job.");
+
+    // 4) Find the item that starts with jobId (e.g. "110016 - FINANCE INTERN") and click it
+    let targetItem = null;
+    dropdownOptions.forEach(item => {
+      if (item.innerText.trim().startsWith(jobId)) {
+        targetItem = item;
+      }
+    });
+    if (targetItem) {
+      targetItem.click();
+      console.log("Selected item:", targetItem.innerText.trim());
+    } else {
+      console.error("No dropdown item found that starts with Job ID:", jobId);
+      return;
+    }
+    await sleep(500);
+
+    // 5) Set the start date to today using the label text approach
+    // Wait for the label element that contains "Start Date*"
+    const startLabel = await waitForLabelContaining("Start Date*", 10000);
+    if (!startLabel) {
+      console.error("Start Date label not found.");
+      return;
+    }
+    console.log("Found Start Date label:", startLabel.innerText.trim());
+    // Click the label to open the date picker
+    startLabel.click();
+    console.log("Clicked Start Date label.");
+    await sleep(500);
+
+    // Build today's date in "DD/MM/YYYY" format
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    const todayStr = `${dd}/${mm}/${yyyy}`;
+
+    // Call your existing selectDate() with the parsed date
+    await selectDate(parseDDMMYYYY(todayStr));
+    console.log("Selected today's date:", todayStr);
+    await sleep(500);
+
+    // 6) Set the end date to jobData.deadline
+// 6) Set the end date to jobData.deadline using the label "End Date*"
+const endDateLabel = await waitForLabelContaining("End Date*", 10000);
+if (!endDateLabel) {
+  console.error("End Date label not found.");
+  return;
+}
+console.log("Found End Date label:", endDateLabel.innerText.trim());
+endDateLabel.click();
+console.log("Clicked End Date label.");
+await sleep(500);
+
+const parsedDeadline = parseDDMMYYYY(jobData.deadline);
+if (!parsedDeadline || isNaN(parsedDeadline.getTime())) {
+  console.warn("Invalid or missing deadline date:", jobData.deadline, "Skipping end date selection.");
+} else {
+  await selectDate(parsedDeadline);
+  console.log("Selected end date:", jobData.deadline);
+  endDateLabel.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+}
+
+
+    console.log("Successfully selected new job, start date, and end date.");
+    endDateLabel.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+  } catch (err) {
+    console.error("Error in setNewJobBooking:", err);
+  }
+
+  const savebtn = await waitForElement ('button.v-btn:nth-child(3)')
+  // const savebtn = await waitForXPath('/html/body/div[1]/div/div/div[1]/div/main/div/div/div[2]/div/div/div[2]/div/div[2]/div[2]/div/div[10]/div[2]/div/div/div/div[2]/div/div/div[3]/button[2]/span[3]');
+  if (!savebtn) {
+    console.error("Save button not found.");
+    return;
+  }
+  savebtn.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+  savebtn.click();
+  console.log("Clicked save button");
+}
+
+
+await setNewJobBooking(jobData);
+
+
+
+// -------------------
+// Utility Functions
+// -------------------
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function parseDDMMYYYY(dateStr) {
+  if (!dateStr) return null;
+  const [d, m, y] = dateStr.split("/");
+  if (!d || !m || !y) return null;
+  return new Date(+y, +m - 1, +d);
+}
+
+async function waitForElement(selector, timeout = 30000) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    (function check() {
+      const el = document.querySelector(selector);
+      if (el) return resolve(el);
+      if (Date.now() - startTime > timeout) {
+        return reject(new Error(`Timeout waiting for selector: ${selector}`));
+      }
+      requestAnimationFrame(check);
+    })();
+  });
+}
+
+async function waitForXPath(xpath, timeout = 30000) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    (function check() {
+      const xpResult = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+      const el = xpResult.singleNodeValue;
+      if (el) return resolve(el);
+      if (Date.now() - startTime > timeout) {
+        return reject(new Error(`Timeout waiting for XPath: ${xpath}`));
+      }
+      requestAnimationFrame(check);
+    })();
+  });
+}
+
+// Helper: Wait for a label element whose text contains the specified string
+async function waitForLabelContaining(text, timeout = 10000) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    (function check() {
+      const labels = document.querySelectorAll("label");
+      for (const label of labels) {
+        if (label.innerText && label.innerText.trim().includes(text)) {
+          return resolve(label);
+        }
+      }
+      if (Date.now() - startTime > timeout) {
+        return reject(new Error("Timeout waiting for label containing: " + text));
+      }
+      requestAnimationFrame(check);
+    })();
+  });
+}
+
+// await setNewJobBooking(jobData);
+        
     console.log("All primary fields filled!");
   } catch (err) {
     console.error("Error in fillPlatformPage:", err);
   }
 }
+
+// ----------------------
+// Utility Functions
+// ----------------------
 
 async function selectDate(dateObj) {
     try {
@@ -668,11 +1013,6 @@ async function selectDayByText(targetDay) {
     console.log(`Selected day: ${targetDayStr}`);
     await sleep(500);
   }
-
-    //----------------------
-    // Job Type
-    // ----------------------
-
 
 // -------------------
 // Utility Functions

@@ -43,7 +43,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           const jobType   = card.querySelector('input[placeholder="Job Type"]')?.value || "";
           const applyLink = card.querySelector('input[placeholder="Apply Link"]')?.value || "";
           const regions   = card.querySelector('input[placeholder="Regions"]')?.value || "";
-          const JD        = card.querySelector('textarea[placeholder="Job Description"]')?.value || "";
+          // const JD        = card.querySelector('textarea[placeholder="Job Description"]')?.value || "";
           const deadline  = card.querySelector('input[placeholder="Application Deadline"]')?.value || "";
           const tags      = card.querySelector('input[placeholder="Tags"]')?.value || "";
           const description = card.querySelector('textarea[placeholder="Job Description"]')?.value || "";
@@ -56,7 +56,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             jobType,
             applyLink,
             regions,
-            JD,
+            // JD,
             deadline,
             tags,
             description
