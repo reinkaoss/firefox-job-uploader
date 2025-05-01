@@ -47,7 +47,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           const deadline  = card.querySelector('input[placeholder="Application Deadline"]')?.value || "";
           const tags      = card.querySelector('input[placeholder="Tags"]')?.value || "";
           const description = card.querySelector('textarea[placeholder="Job Description"]')?.value || "";
-
+          const relevantYear = card.querySelector('input[placeholder="Relevant Year"]')?.value || "";
+          const startDate = card.querySelector('input[placeholder="Employment Start Date"]')?.value || "";
           jobsData.push({
             title,
             company,
@@ -58,6 +59,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             regions,
             // JD,
             deadline,
+            relevantYear,
+            startDate,
             tags,
             description
           });

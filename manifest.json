@@ -1,32 +1,33 @@
 {
-    "manifest_version": 3,
-    "name": "Job Data Extractor",
-    "version": "1.0",
-    "description": "Extracts job info from job-cards and displays JSON.",
-    
-    "permissions": [
-        "activeTab",
+  "manifest_version": 3,
+  "name": "Job Data Extractor",
+  "version": "1.0",
+  "description": "Extracts job info from job-cards and displays JSON.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{09139e0b-16e0-4d56-bc8d-176266e2ddc7}",
+      "strict_min_version": "91.0"
+    }
+  },
+  "permissions": [
+    "activeTab",
     "tabs",
     "scripting"
-    ],
-  
-    "icons": {
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    },
-  
-    "action": {
-      "default_popup": "popup.html",
-      "default_icon": {
-        "48": "icons/icon48.png"
-      }
-    },
-  
-    "content_scripts": [
-      {
-        "matches": ["<all_urls>"], 
-        "js": ["content-script.js"]
-      }
-    ]
-  }
-  
+  ],
+  "icons": {
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/icon48.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"]
+    }
+  ]
+}

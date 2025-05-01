@@ -54,14 +54,14 @@ const handleApplyMethod = async (jobData) => {
       applyMethodRadio.click();
       console.log(`Checked the "${useEmail ? 'Email Address' : 'Apply Link'}" radio button`);
     }
-    await sleep(500);
+    // await sleep(500);
 
     // Fill in the appropriate input field
     const inputName = useEmail ? 'mailtoLink' : 'jobRedirect';
     const applyInput = await waitForElement(`input[name="${inputName}"]`, 10000);
     fillInput(applyInput, applyValue);
     console.log(`${useEmail ? 'Email address' : 'Apply link'} filled with:`, applyValue);
-    await sleep(200);
+    // await sleep(1000);
 
   } catch (error) {
     console.error('❌ Error handling apply method:', error);
@@ -71,13 +71,12 @@ const handleApplyMethod = async (jobData) => {
 // Call the function with the jobData
 await handleApplyMethod(jobData);
 
+
     // 5) Ongoing Deadline => uncheck if needed
-    await sleep(1000);
     const ongoingCheckbox = await waitForElement('input[type="checkbox"][name="ongoing"]', 5000);
-    // Only uncheck if a valid deadline is provided
-    if (jobData.deadline && jobData.deadline !== 'NULL' && jobData.deadline !== '' && ongoingCheckbox.checked) {
+    if (ongoingCheckbox.checked) {
       ongoingCheckbox.click();
-      console.log('Unchecked the "Ongoing Deadline" checkbox because a deadline is provided');
+      console.log('Unchecked the "Ongoing Deadline" checkbox');
     }
     await sleep(500);
 
@@ -88,7 +87,7 @@ await handleApplyMethod(jobData);
       console.warn("Invalid or missing deadline date:", jobData.deadline, "Skipping date picker selection.");
     } else {
       await selectDate(parsedDate);
-      await sleep(300);
+      await sleep(1000);
     }
 
     // 7) Salary/Benefits
@@ -196,98 +195,6 @@ await handleApplyMethod(jobData);
     // 🏹 Run the function with salary data
     await selectDropdown(jobData.salary);
 
-    // 7.1) Relevanr Year and Start Date
-    async function handleRelevantYearCheckboxes(jobData) {
-      console.log("relevant year is", jobData.relevantYear);
-      if (!jobData || !jobData.relevantYear) {
-        console.warn("No relevant year data provided.");
-        return;
-      }
-    
-      // Normalize the relevantYear string and split into individual entries.
-      const relevantYears = jobData.relevantYear
-        .split(',')
-        .map(year => year.trim().toLowerCase());
-    
-      // Mapping of expected keywords to the corresponding checkbox aria-label text.
-      const checkboxMapping = {
-        "1st years": "Is job relevant to 1st years?",
-        "2nd years": "Is job relevant to 2nd years?",
-        "3rd years": "Is job relevant to 3rd years?",
-        "3rd year" : "Is job relevant to 3rd years?",
-        "graduate": "Is job relevant to Graduates?",
-        "graduates": "Is job relevant to Graduates?"
-      };
-    
-      // Iterate over each mapping key.
-      for (const [key, ariaLabel] of Object.entries(checkboxMapping)) {
-        // If the keyword is present in the relevantYears array...
-        if (relevantYears.includes(key)) {
-          try {
-            // Find the checkbox using its aria-label attribute.
-            const checkbox = await waitForElement(`input[aria-label="${ariaLabel}"]`, 5000);
-            if (checkbox && !checkbox.checked) {
-              checkbox.click();
-              console.log(`Checked the checkbox for "${ariaLabel}"`);
-            }
-          } catch (error) {
-            console.error(`Could not find checkbox for "${ariaLabel}":`, error);
-          }
-        }
-      }
-    }
-
-    await handleRelevantYearCheckboxes(jobData);
-
-    // 7.2) Start Date
-
-    async function setEmploymentStartDate(jobData) {
-      if (!jobData || !jobData.startDate) {
-        console.warn('No start date provided in jobData.');
-        return;
-      }
-    
-      try {
-        // Find the label element containing 'Employment Start Date' (case-insensitive)
-        const labels = Array.from(document.querySelectorAll('label'));
-        const targetLabel = labels.find(label =>
-          label.textContent && label.textContent.toLowerCase().includes('employment start date')
-        );
-    
-        if (!targetLabel) {
-          console.error('Employment Start Date label not found.');
-          return;
-        }
-    
-        // Get the value of the 'for' attribute from the label
-        const inputId = targetLabel.getAttribute('for');
-        let inputField;
-    
-        if (inputId) {
-          inputField = document.getElementById(inputId);
-        } else {
-          // If no 'for' attribute, try to find an input in the same container
-          inputField = targetLabel.querySelector('input');
-        }
-    
-        if (!inputField) {
-          console.error('Input field for Employment Start Date not found.');
-          return;
-        }
-    
-        // Set the input field's value to jobData.startDate and trigger events
-        inputField.value = jobData.startDate;
-        inputField.dispatchEvent(new Event('input', { bubbles: true }));
-        inputField.dispatchEvent(new Event('change', { bubbles: true }));
-    
-        console.log(`Employment Start Date set to: ${jobData.startDate}`);
-      } catch (error) {
-        console.error('Error setting Employment Start Date:', error);
-      }
-    }
-
-    await setEmploymentStartDate(jobData);
-
     // 8) Location
 
 async function handleLocations(jobData) {
@@ -329,7 +236,6 @@ async function handleLocations(jobData) {
       // Click the "Add Location" button
       const addLocationButton = await waitForElement(
         'button.v-btn--slim.v-theme--dark.v-btn--density-default.v-btn--size-default.v-btn--variant-text.mt-3.bg-green'
-        // 'button.v-btn v-btn--elevated v-btn--icon v-theme--light v-btn--density-default v-btn--size-default v-btn--variant-elevated mt-3 bg-green'
       );
       addLocationButton.click();
 
@@ -553,17 +459,6 @@ await handleLocations(jobData);
         console.log('✅ Update Job button clicked successfully');
         await sleep(1000); // Wait for any post-update processes
         
-        if (!window._alertOverridden) {
-            window._alertOverridden = true;
-            const originalAlert = window.alert;
-            window.alert = function(message) {
-                if (message && message.includes("There are validation errors on the current form")) {
-                    console.warn("Validation error alert detected:", message);
-                    debugger; // Break execution here for debugging
-                }
-                return originalAlert(message);
-            };
-        }
       } catch (error) {
         console.error('❌ Error clicking Update Job button:', error);
       }
@@ -625,9 +520,89 @@ await handleLocations(jobData);
         await setJobDescription(jobData.description);
         await handleJobUpdate(); 
 
+
+
         //---------------------------------------------------------
         // SETTING JOBS LIVE
         //---------------------------------------------------------
+
+// SAVE URL VALUES & SHOW IN MODAL WITH COPY BUTTON
+// async function extractPreviewLinks() {
+//   try {
+//     const previewButtons = document.querySelectorAll('.preview-button');
+//     const previewUrls = Array.from(previewButtons).map(button => button.href);
+
+//     if (previewUrls.length === 0) {
+//       console.warn("No preview URLs found.");
+//       return;
+//     }
+
+//     console.log("Extracted preview URLs:", previewUrls);
+
+//     // Send preview URLs back to the extension
+//     chrome.runtime.sendMessage({ action: "storePreviewUrls", urls: previewUrls });
+
+//     // Create modal
+//     const modal = document.createElement("div");
+//     modal.style.position = "fixed";
+//     modal.style.top = "50%";
+//     modal.style.left = "50%";
+//     modal.style.transform = "translate(-50%, -50%)";
+//     modal.style.background = "white";
+//     modal.style.border = "2px solid black";
+//     modal.style.padding = "20px";
+//     modal.style.zIndex = "9999";
+//     modal.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
+//     modal.style.fontSize = "16px";
+//     modal.style.fontFamily = "sans-serif";
+//     modal.style.borderRadius = "10px";
+//     modal.style.maxHeight = "400px";
+//     modal.style.overflowY = "auto";
+
+//     const heading = document.createElement("div");
+//     heading.style.fontWeight = "bold";
+//     heading.style.marginBottom = "10px";
+//     heading.textContent = "Stored URLs:";
+
+//     const list = document.createElement("textarea");
+//     list.value = previewUrls.join("\n");
+//     list.readOnly = true;
+//     list.style.width = "100%";
+//     list.style.height = "200px";
+//     list.style.marginBottom = "10px";
+
+//     const copyBtn = document.createElement("button");
+//     copyBtn.textContent = "Copy All URLs";
+//     copyBtn.style.padding = "6px 10px";
+//     copyBtn.style.cursor = "pointer";
+//     copyBtn.addEventListener("click", () => {
+//       list.select();
+//       document.execCommand("copy");
+//       copyBtn.textContent = "Copied!";
+//       setTimeout(() => (copyBtn.textContent = "Copy All URLs"), 2000);
+//     });
+
+//     const closeBtn = document.createElement("button");
+//     closeBtn.textContent = "Close";
+//     closeBtn.style.marginLeft = "10px";
+//     closeBtn.style.padding = "6px 10px";
+//     closeBtn.style.cursor = "pointer";
+//     closeBtn.addEventListener("click", () => {
+//       modal.remove();
+//     });
+
+//     modal.appendChild(heading);
+//     modal.appendChild(list);
+//     modal.appendChild(copyBtn);
+//     modal.appendChild(closeBtn);
+
+//     document.body.appendChild(modal);
+//   } catch (err) {
+//     console.error("Error extracting preview links:", err);
+//   }
+// }
+
+// extractPreviewLinks();
 
 // Set job Live
 async function setJobLiveFromContentPage() {
@@ -697,67 +672,35 @@ async function selectJobListingTab(jobType) {
     console.log("Tab text determined:", tabText);
     
     // Get all ServiceHeader elements that have a child with class 'unbooked'
-    // const serviceHeaders = Array.from(document.querySelectorAll(".ServiceHeader"))
-    //   .filter(header => header.querySelector(".unbooked"));
+    const serviceHeaders = Array.from(document.querySelectorAll(".ServiceHeader"))
+      .filter(header => header.querySelector(".unbooked"));
 
-    // if (serviceHeaders.length === 0) {
-    //   console.warn("No ServiceHeader elements with class 'unbooked' found.");
-    // } else {
-    //   console.log("Found", serviceHeaders.length, "ServiceHeader elements with class 'unbooked':");
-    //   serviceHeaders.forEach((header, index) => {
-    //     // Get all spans in the header that are not marked as ServiceAttributes
-    //     const spans = header.querySelectorAll("span:not(.ServiceAttributes)");
-    //     const spanTexts = Array.from(spans).map(span => span.innerText.trim()).filter(text => text.length > 0);
-    //     console.log("ServiceHeader " + index + ":", spanTexts.join(" | "));
-    //   });
-    // }
+    if (serviceHeaders.length === 0) {
+      console.warn("No ServiceHeader elements with class 'unbooked' found.");
+    } else {
+      console.log("Found", serviceHeaders.length, "ServiceHeader elements with class 'unbooked':");
+      serviceHeaders.forEach((header, index) => {
+        // Get all spans in the header that are not marked as ServiceAttributes
+        const spans = header.querySelectorAll("span:not(.ServiceAttributes)");
+        const spanTexts = Array.from(spans).map(span => span.innerText.trim()).filter(text => text.length > 0);
+        console.log("ServiceHeader " + index + ":", spanTexts.join(" | "));
+      });
+    }
 
-    // let found = false;
-    // serviceHeaders.forEach(header => {
-    //   // Look for spans that might contain the target text
-    //   const spans = header.querySelectorAll("span:not(.ServiceAttributes)");
-    //   spans.forEach(span => {
-    //     if (span.innerText && span.innerText.trim().toLowerCase().includes(tabText.toLowerCase())) {
-    //       header.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-    //       header.click();
-    //       console.log("Clicked ServiceHeader with text:", span.innerText.trim());
-    //       found = true;
-    //     }
-    //   });
-    // });
-    // await sleep(500);
-    // Get all ServiceHeader elements that have a child with class 'unbooked'
-const serviceHeaders = Array.from(document.querySelectorAll(".ServiceHeader"))
-.filter(header => header.querySelector(".unbooked"));
-
-if (serviceHeaders.length === 0) {
-console.warn("No ServiceHeader elements with class 'unbooked' found.");
-} else {
-console.log("Found", serviceHeaders.length, "ServiceHeader elements with class 'unbooked':");
-serviceHeaders.forEach((header, index) => {
-  // Get all spans in the header that are not marked as ServiceAttributes
-  const spans = header.querySelectorAll("span:not(.ServiceAttributes)");
-  const spanTexts = Array.from(spans)
-    .map(span => span.innerText.trim())
-    .filter(text => text.length > 0);
-  console.log("ServiceHeader " + index + ":", spanTexts.join(" | "));
-});
-}
-
-let found = false;
-serviceHeaders.forEach(header => {
-// Look for spans that might exactly match the target text
-const spans = header.querySelectorAll("span:not(.ServiceAttributes)");
-spans.forEach(span => {
-  if (span.innerText && span.innerText.trim().toLowerCase() === tabText.toLowerCase()) {
-    header.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-    header.click();
-    console.log("Clicked ServiceHeader with text:", span.innerText.trim());
-    found = true;
-  }
-});
-});
-await sleep(500);
+    let found = false;
+    serviceHeaders.forEach(header => {
+      // Look for spans that might contain the target text
+      const spans = header.querySelectorAll("span:not(.ServiceAttributes)");
+      spans.forEach(span => {
+        if (span.innerText && span.innerText.trim().toLowerCase().includes(tabText.toLowerCase())) {
+          header.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+          header.click();
+          console.log("Clicked ServiceHeader with text:", span.innerText.trim());
+          found = true;
+        }
+      });
+    });
+    await sleep(500);
     if (!found) {
       console.error("Could not find a ServiceHeader with text containing:", tabText);
     }
@@ -777,7 +720,7 @@ async function setNewJobBooking(jobData) {
   try {
     const jobId = window.jobId;
     console.log("Starting setNewJobBooking with jobId:", jobId);
-    await sleep(1000);
+
     const dropdownInput = document.querySelector('input[title="Open"]');
     if (!dropdownInput) {
       console.error('No input found with title="Open"');
@@ -809,53 +752,34 @@ async function setNewJobBooking(jobData) {
     }
     console.log("Found", dropdownOptions.length, "dropdown items in Select New Job.");
 
-    // 4) Find the item that starts with jobId (e.g. "110016 - FINANCE INTERN") and click it with retry logic
-    let targetItem = Array.from(dropdownOptions).find(item => item.innerText.trim().startsWith(jobId));
+    // 4) Find the item that starts with jobId (e.g. "110016 - FINANCE INTERN") and click it
+    let targetItem = null;
+    dropdownOptions.forEach(item => {
+      if (item.innerText.trim().startsWith(jobId)) {
+        targetItem = item;
+      }
+    });
     if (targetItem) {
       targetItem.click();
       console.log("Selected item:", targetItem.innerText.trim());
     } else {
-      console.warn("No dropdown item found on first attempt. Retrying...");
-      window.click();
-      await sleep(200);
-      dropdownInput.click();
-      await sleep(500);
-      dropdownOptions = document.querySelectorAll('.v-list-item');
-      targetItem = Array.from(dropdownOptions).find(item => item.innerText.trim().startsWith(jobId));
-      
-      if (targetItem) {
-        targetItem.click();
-        console.log("Selected item on retry:", targetItem.innerText.trim());
-      } else {
-        console.error("No dropdown item found that starts with Job ID:", jobId);
-        return;
-      }
+      console.error("No dropdown item found that starts with Job ID:", jobId);
+      return;
     }
     await sleep(500);
 
     // 5) Set the start date to today using the label text approach
-    // Find the label element that exactly matches "Start Date*"
-    const labels = document.querySelectorAll("label");
-    const startLabel = Array.from(labels).find(label => label.innerText && label.innerText.trim() === "Start Date*");
-
-    // START DATE (TO IGNORE)
-    // div.v-col-5:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)
-
-    // START DATE * CSS SELECTOR (SELECT THIS ONE INSTEAD)
-    // div.v-input--dirty:nth-child(2) > div:nth-child(2) > div:nth-child(1)
-
+    // Wait for the label element that contains "Start Date*"
+    const startLabel = await waitForLabelContaining("Start Date*", 10000);
     if (!startLabel) {
-      console.error("Start Date* label not found.");
+      console.error("Start Date label not found.");
       return;
     }
-    console.log("Found Start Date* label:", startLabel.innerText.trim());
+    console.log("Found Start Date label:", startLabel.innerText.trim());
     // Click the label to open the date picker
     startLabel.click();
-    console.log("Clicked Start Date* label.");
+    console.log("Clicked Start Date label.");
     await sleep(500);
-
-
-
 
     // Build today's date in "DD/MM/YYYY" format
     const today = new Date();
@@ -881,26 +805,14 @@ endDateLabel.click();
 console.log("Clicked End Date label.");
 await sleep(500);
 
-// const parsedDeadline = parseDDMMYYYY(jobData.deadline);
-// if (!parsedDeadline || isNaN(parsedDeadline.getTime())) {
-//   console.warn("Invalid or missing deadline date:", jobData.deadline, "Skipping end date selection.");
-// } else {
-//   await selectDate(parsedDeadline);
-//   console.log("Selected end date:", jobData.deadline);
-//   endDateLabel.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-// }
 const parsedDeadline = parseDDMMYYYY(jobData.deadline);
 if (!parsedDeadline || isNaN(parsedDeadline.getTime())) {
-  // If deadline is null or invalid, set end date to 6 months from today
-  const sixMonthsLater = new Date();
-  sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
-  await selectDate(sixMonthsLater);
-  console.log("Deadline was invalid or ongoing. Set end date to six months from today:", sixMonthsLater.toLocaleDateString());
+  console.warn("Invalid or missing deadline date:", jobData.deadline, "Skipping end date selection.");
 } else {
   await selectDate(parsedDeadline);
   console.log("Selected end date:", jobData.deadline);
+  endDateLabel.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
 }
-endDateLabel.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
 
 
     console.log("Successfully selected new job, start date, and end date.");
@@ -918,14 +830,11 @@ endDateLabel.scrollIntoView({ behavior: "smooth", block: "center", inline: "near
   savebtn.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
   savebtn.click();
   console.log("Clicked save button");
-  await sleep(3000);
-  // close the tab 
-  console.log("closing the current tab.");
-  window.close();
 }
 
 
 await setNewJobBooking(jobData);
+
 
 
 // -------------------
