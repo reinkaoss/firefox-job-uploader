@@ -10,6 +10,7 @@ A lightweight Firefox browser extension that automates job posting by extracting
 - 📦 **Data Persistence** – Locally caches extracted job info for reuse or audit.
 - 🧪 **Dev-Friendly** – Modular architecture and detailed console logging for debugging and testing.
 
+![Extension UI](https://d3d2prueitotgu.cloudfront.net/Screenshot%202025-05-12%20at%2009.00.30.png)
 ---
 
 ## 📦 Installation (Development Mode)
