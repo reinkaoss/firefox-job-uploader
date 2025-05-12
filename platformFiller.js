@@ -12,20 +12,20 @@ async function fillPlatformPage(jobData) {
   console.log("Filling the page with job data:", jobData);
   try {
     // 1) Click "Create Job" button
-    const createBtn = await waitForElement('[data-cy-id="create-job"]', 15000);
+    const createBtn = await waitForElement('[data-cy-id="create-job"]', 300);
     console.log("Found create-job button:", createBtn);
     createBtn.click();
     // await sleep(2000);
 
 
     // 2) Fill job title
-    const titleInput = await waitForElement('input[name="job-name-txt"]', 10000);
+    const titleInput = await waitForElement('input[name="job-name-txt"]', 300);
     fillInput(titleInput, jobData.title);
     console.log("Title filled with:", jobData.title);
     // await sleep(1000);
 
     // 3) Submit "Create Job"
-    const createJobSubmit = await waitForElement('[data-cy-id="create-job-submit"]', 10000);
+    const createJobSubmit = await waitForElement('[data-cy-id="create-job-submit"]', 300);
     createJobSubmit.click();
     console.log("Clicked create job submit!");
     // await sleep(3000);
@@ -48,7 +48,7 @@ const handleApplyMethod = async (jobData) => {
     
     // Select the appropriate radio button based on type
     const radioValue = useEmail ? 'mailto' : 'redirect';
-    const applyMethodRadio = await waitForElement(`input[type="radio"][value="${radioValue}"]`, 5000);
+    const applyMethodRadio = await waitForElement(`input[type="radio"][value="${radioValue}"]`, 1000);
     
     if (!applyMethodRadio.checked) {
       applyMethodRadio.click();
@@ -58,7 +58,7 @@ const handleApplyMethod = async (jobData) => {
 
     // Fill in the appropriate input field
     const inputName = useEmail ? 'mailtoLink' : 'jobRedirect';
-    const applyInput = await waitForElement(`input[name="${inputName}"]`, 10000);
+    const applyInput = await waitForElement(`input[name="${inputName}"]`, 1000);
     fillInput(applyInput, applyValue);
     console.log(`${useEmail ? 'Email address' : 'Apply link'} filled with:`, applyValue);
     await sleep(200);
@@ -73,9 +73,9 @@ await handleApplyMethod(jobData);
 
     // 5) Ongoing Deadline => uncheck if needed
     await sleep(1000);
-    const ongoingCheckbox = await waitForElement('input[type="checkbox"][name="ongoing"]', 5000);
+    const ongoingCheckbox = await waitForElement('input[type="checkbox"][name="ongoing"]', 500);
     // Only uncheck if a valid deadline is provided
-    if (jobData.deadline && jobData.deadline !== 'NULL' && jobData.deadline !== '' && ongoingCheckbox.checked) {
+    if (jobData.deadline && jobData.deadline !== 'null' && jobData.deadline !== '' && ongoingCheckbox.checked) {
       ongoingCheckbox.click();
       console.log('Unchecked the "Ongoing Deadline" checkbox because a deadline is provided');
     }
@@ -92,10 +92,10 @@ await handleApplyMethod(jobData);
     }
 
     // 7) Salary/Benefits
-    const benefitsInput = await waitForElement('input[name="benefits"]', 10000);
+    const benefitsInput = await waitForElement('input[name="benefits"]', 200);
     fillInput(benefitsInput, jobData.salary);
     console.log("Salary filled with:", jobData.salary);
-    await sleep(1000);
+    await sleep(200);
 
     // 7.1) Salary Dropdown
     async function selectDropdown(jobSalary) {
@@ -118,7 +118,7 @@ await handleApplyMethod(jobData);
                 "£28,000 - £29,999",
                 "£30,000+",
                 "Competitive",
-                "Unpaid"
+                "Unpaid" 
             ];
     
             // Convert jobSalary to a number (e.g. "£25,300" → 25300)
@@ -143,24 +143,43 @@ await handleApplyMethod(jobData);
     
             console.log(`✅ Selecting salary: ${salaryOptions[targetIndex]}`);
     
-            // 1️⃣ Click the dropdown arrow to open it
-            const dropdownArrow = await waitForElement("i.v-select__menu-icon", 5000);
-            console.log("✅ Found dropdown arrow:", dropdownArrow);
-            dropdownArrow.click();
-            await sleep(700);
+            // // 1️⃣ Click the dropdown arrow to open it
+            // const dropdownArrow = await waitForElement("i.v-select__menu-icon", 1000);
+            // console.log("✅ Found dropdown arrow:", dropdownArrow);
+            // dropdownArrow.click();
+            // await sleep(700);
     
-            // 2️⃣ Wait for the dropdown input field
-            const dropdownInput = await waitForElement("input[name='salaryId']", 5000);
-            console.log("✅ Dropdown input found:", dropdownInput);
-            dropdownInput.focus();
-            await sleep(500);
+            // // 2️⃣ Wait for the dropdown input field
+            // const dropdownInput = await waitForElement("input[name='salaryId']", 1000);
+            // console.log("✅ Dropdown input found:", dropdownInput);
+            // dropdownInput.focus();
+            // await sleep(500);
     
-            // 3️⃣ Move down the required number of times
-            console.log(`📌 Moving down ${targetIndex} times...`);
-            for (let i = 0; i <= targetIndex; i++) {
-                dropdownInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-                await sleep(300);
-            }
+            // // 3️⃣ Move down the required number of times
+            // console.log(`📌 Moving down ${targetIndex} times...`);
+            // for (let i = 0; i <= targetIndex; i++) {
+            //     dropdownInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+            //     await sleep(300);
+            // }
+
+                        // 1️⃣ Click the dropdown arrow to open it
+                        const dropdownArrow = await waitForElement("i.v-select__menu-icon", 100);
+                        console.log("✅ Found dropdown arrow:", dropdownArrow);
+                        dropdownArrow.click();
+                        await sleep(50);
+                
+                        // 2️⃣ Wait for the dropdown input field
+                        const dropdownInput = await waitForElement("input[name='salaryId']", 100);
+                        console.log("✅ Dropdown input found:", dropdownInput);
+                        dropdownInput.focus();
+                        await sleep(50);
+                
+                        // 3️⃣ Move down the required number of times
+                        console.log(`📌 Moving down ${targetIndex} times...`);
+                        for (let i = 0; i <= targetIndex; i++) {
+                            dropdownInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+                            await sleep(50);
+                        }
     
             // 4️⃣ LOG ALL DROPDOWN OPTIONS (to debug missing elements)
             const dropdownOptions = document.querySelectorAll('.v-list-item');
@@ -212,7 +231,9 @@ await handleApplyMethod(jobData);
       // Mapping of expected keywords to the corresponding checkbox aria-label text.
       const checkboxMapping = {
         "1st years": "Is job relevant to 1st years?",
+        "1st year": "Is job relevant to 1st years?",
         "2nd years": "Is job relevant to 2nd years?",
+        "2nd year": "Is job relevant to 2nd years?",
         "3rd years": "Is job relevant to 3rd years?",
         "3rd year" : "Is job relevant to 3rd years?",
         "graduate": "Is job relevant to Graduates?",
@@ -225,7 +246,7 @@ await handleApplyMethod(jobData);
         if (relevantYears.includes(key)) {
           try {
             // Find the checkbox using its aria-label attribute.
-            const checkbox = await waitForElement(`input[aria-label="${ariaLabel}"]`, 5000);
+            const checkbox = await waitForElement(`input[aria-label="${ariaLabel}"]`, 1000);
             if (checkbox && !checkbox.checked) {
               checkbox.click();
               console.log(`Checked the checkbox for "${ariaLabel}"`);
@@ -368,15 +389,15 @@ await handleLocations(jobData);
             console.log(` Selecting job type: ${jobType}`);
     
             // 1️Open the dropdown
-            const jobTypeArrow = await waitForXPath('/html/body/div[1]/div/div/div[1]/div/main/div/div/div[2]/div/div[2]/div[6]/div/div[1]/div/div[1]/div/div[4]/i', 10000);
+            const jobTypeArrow = await waitForXPath('/html/body/div[1]/div/div/div[1]/div/main/div/div/div[2]/div/div[2]/div[6]/div/div[1]/div/div[1]/div/div[4]/i', 1000);
             console.log("Found job type arrow:", jobTypeArrow);
             jobTypeArrow.click();
             console.log("Clicked job type arrow.");
-            await sleep(500);
-            const jobTypeDropdown = await waitForElement('input[name="jobType"]', 10000);
+            await sleep(100);
+            const jobTypeDropdown = await waitForElement('input[name="jobType"]', 1000);
             console.log("Found job type dropdown:", jobTypeDropdown);
             jobTypeDropdown.click();
-            await sleep(500);
+            await sleep(100);
     
             // 2️ Match job type to its index in dropdown
             const jobTypeOptions = [ "Internship (1 Month+)", "Placement (10 Months+)", "Graduate Job", "Graduate Scheme", "Level 2 Apprenticeship", "Level 3 Apprenticeship", "Higher Level Apprenticeship", "Degree Apprenticeship", "School Leaver Programme", "Work Experience", "Insight/Vacation Scheme (< 4 Weeks)", "Insight Day" ];
@@ -608,7 +629,7 @@ await handleLocations(jobData);
           throw new Error('Editor element not found');
         }
         // Append the "How to apply" section to the description
-        const fullDescription = `${description}\n\n<h3>How to apply</h3>To apply for this role and to find out more, please click on the apply button.\n\nPlease note that applications may close before the application deadline, so apply early to avoid disappointment.`;
+        const fullDescription = `${description}\n\n<h3>How to apply</h3>To apply for this role and to find out more, please click on the apply button. Please note that applications may close before the application deadline, so apply early to avoid disappointment.`;
         // Set the content and remove the ql-blank class
         editor.innerHTML = fullDescription;
         editor.classList.remove('ql-blank');
@@ -646,19 +667,19 @@ async function setJobLiveFromContentPage() {
     console.log("✅ Extracted Job ID:", jobId);
 
     // 2️⃣ Click the "Campaigns" tab
-    const campaignsTab = await waitForXPath('/html/body/div[1]/div/div/div[1]/div/div/div[3]/a[1]', 10000, el => el.innerText.trim() === "Campaigns");
+    const campaignsTab = await waitForXPath('/html/body/div[1]/div/div/div[1]/div/div/div[3]/a[1]', 1000, el => el.innerText.trim() === "Campaigns");
     campaignsTab.click();
     console.log("✅ Clicked Campaigns tab");
     await sleep(1000);
 
     // 3️⃣ Click the campaign name link (first one)
-    const campaignLink = await waitForElement("tbody.v-data-table__tbody td a[href*='campaigns']", 10000);
+    const campaignLink = await waitForElement("tbody.v-data-table__tbody td a[href*='campaigns']", 1000);
     campaignLink.click();
     console.log("✅ Clicked Campaign link");
     await sleep(2000);
 
     // 4️⃣ Expand the correct section (e.g., job list or settings)
-    const expansionOverlay = await waitForElement(".v-expansion-panel-title__overlay", 10000);
+    const expansionOverlay = await waitForElement(".v-expansion-panel-title__overlay", 1000);
     expansionOverlay.click();
     console.log("✅ Clicked expansion panel overlay");
   
@@ -695,38 +716,7 @@ async function selectJobListingTab(jobType) {
     }
     
     console.log("Tab text determined:", tabText);
-    
-    // Get all ServiceHeader elements that have a child with class 'unbooked'
-    // const serviceHeaders = Array.from(document.querySelectorAll(".ServiceHeader"))
-    //   .filter(header => header.querySelector(".unbooked"));
 
-    // if (serviceHeaders.length === 0) {
-    //   console.warn("No ServiceHeader elements with class 'unbooked' found.");
-    // } else {
-    //   console.log("Found", serviceHeaders.length, "ServiceHeader elements with class 'unbooked':");
-    //   serviceHeaders.forEach((header, index) => {
-    //     // Get all spans in the header that are not marked as ServiceAttributes
-    //     const spans = header.querySelectorAll("span:not(.ServiceAttributes)");
-    //     const spanTexts = Array.from(spans).map(span => span.innerText.trim()).filter(text => text.length > 0);
-    //     console.log("ServiceHeader " + index + ":", spanTexts.join(" | "));
-    //   });
-    // }
-
-    // let found = false;
-    // serviceHeaders.forEach(header => {
-    //   // Look for spans that might contain the target text
-    //   const spans = header.querySelectorAll("span:not(.ServiceAttributes)");
-    //   spans.forEach(span => {
-    //     if (span.innerText && span.innerText.trim().toLowerCase().includes(tabText.toLowerCase())) {
-    //       header.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-    //       header.click();
-    //       console.log("Clicked ServiceHeader with text:", span.innerText.trim());
-    //       found = true;
-    //     }
-    //   });
-    // });
-    // await sleep(500);
-    // Get all ServiceHeader elements that have a child with class 'unbooked'
 const serviceHeaders = Array.from(document.querySelectorAll(".ServiceHeader"))
 .filter(header => header.querySelector(".unbooked"));
 
@@ -771,7 +761,6 @@ await selectJobListingTab(jobData.jobType);
 
 
 // CAMPAIGN DROPDOWN AND DATES
-// OLD FUNCTION
 
 async function setNewJobBooking(jobData) {
   try {
@@ -835,24 +824,50 @@ async function setNewJobBooking(jobData) {
 
     // 5) Set the start date to today using the label text approach
     // Find the label element that exactly matches "Start Date*"
-    const labels = document.querySelectorAll("label");
-    const startLabel = Array.from(labels).find(label => label.innerText && label.innerText.trim() === "Start Date*");
+    // const labels = document.querySelectorAll("label");
+    // const startLabel = Array.from(labels).find(label => label.innerText && label.innerText.trim() === "Start Date*");
 
-    // START DATE (TO IGNORE)
-    // div.v-col-5:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)
+    // if (!startLabel) {
+    //   console.error("Start Date* label not found.");
+    //   return;
+    // }
+    // console.log("Found Start Date* label:", startLabel.innerText.trim());
+    // // Click the label to open the date picker
+    // startLabel.click();
+    // console.log("Clicked Start Date* label.");
+    // await sleep(500);
 
-    // START DATE * CSS SELECTOR (SELECT THIS ONE INSTEAD)
-    // div.v-input--dirty:nth-child(2) > div:nth-child(2) > div:nth-child(1)
+// 1. Find the exact label node:
+const labels = Array.from(document.querySelectorAll("label"));
+const startLabel = labels.find(label => {
+  const txt = label.textContent.replace(/\u00A0/g, " ").trim();
+  return txt === "Start Date*";
+});
 
-    if (!startLabel) {
-      console.error("Start Date* label not found.");
-      return;
-    }
-    console.log("Found Start Date* label:", startLabel.innerText.trim());
-    // Click the label to open the date picker
-    startLabel.click();
-    console.log("Clicked Start Date* label.");
-    await sleep(500);
+if (!startLabel) {
+  console.error("Start Date* label not found.");
+  return;
+}
+
+// 2. Get its “for” target (or fallback to the first <input> inside it):
+let inputEl = null;
+const forId = startLabel.getAttribute("for");
+if (forId) {
+  inputEl = document.getElementById(forId);
+} 
+if (!inputEl) {
+  inputEl = startLabel.querySelector("input, div[v-input]"); 
+  // adjust this selector to match your actual clickable element
+}
+
+if (!inputEl) {
+  console.error("Couldn't locate the corresponding input for Start Date*.");
+  return;
+}
+
+// 3. Finally click the input itself:
+inputEl.click();
+console.log("Clicked the Start Date* input only.");
 
 
 
@@ -881,14 +896,6 @@ endDateLabel.click();
 console.log("Clicked End Date label.");
 await sleep(500);
 
-// const parsedDeadline = parseDDMMYYYY(jobData.deadline);
-// if (!parsedDeadline || isNaN(parsedDeadline.getTime())) {
-//   console.warn("Invalid or missing deadline date:", jobData.deadline, "Skipping end date selection.");
-// } else {
-//   await selectDate(parsedDeadline);
-//   console.log("Selected end date:", jobData.deadline);
-//   endDateLabel.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-// }
 const parsedDeadline = parseDDMMYYYY(jobData.deadline);
 if (!parsedDeadline || isNaN(parsedDeadline.getTime())) {
   // If deadline is null or invalid, set end date to 6 months from today
@@ -918,7 +925,7 @@ endDateLabel.scrollIntoView({ behavior: "smooth", block: "center", inline: "near
   savebtn.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
   savebtn.click();
   console.log("Clicked save button");
-  await sleep(3000);
+  await sleep(1000);
   // close the tab 
   console.log("closing the current tab.");
   window.close();
@@ -972,7 +979,7 @@ async function waitForXPath(xpath, timeout = 30000) {
 }
 
 // Helper: Wait for a label element whose text contains the specified string
-async function waitForLabelContaining(text, timeout = 10000) {
+async function waitForLabelContaining(text, timeout = 1000) {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
     (function check() {
@@ -1005,19 +1012,19 @@ async function waitForLabelContaining(text, timeout = 10000) {
 async function selectDate(dateObj) {
     try {
       // 1) Click the date input
-      const dateInput = await waitForElement('input[name="label"]', 5000);
+      const dateInput = await waitForElement('input[name="label"]', 300);
       dateInput.click();
       console.log("Clicked date input to open the calendar UI");
-      await sleep(1000);
+      await sleep(200);
   
       // 2) Click arrow for YEAR
-      const arrowDrop = await waitForXPath('/html/body/div[2]/div/div/div/div[2]/div[1]/button[2]', 5000);
+      const arrowDrop = await waitForXPath('/html/body/div[2]/div/div/div/div[2]/div[1]/button[2]', 300);
       console.log("Found arrow_drop_down button:", arrowDrop);
       arrowDrop.click();
-      await sleep(1000);
+      await sleep(200);
   
       // 3) Year container
-      const yearsContainer = await waitForElement('.v-date-picker-years__content', 5000);
+      const yearsContainer = await waitForElement('.v-date-picker-years__content', 300);
       console.log("Found the years container:", yearsContainer);
   
       const targetYearStr = String(dateObj.getFullYear());
@@ -1029,17 +1036,17 @@ async function selectDate(dateObj) {
       }
       yearButton.click();
       console.log(`Selected year: ${targetYearStr}`);
-      await sleep(1000);
+      await sleep(200);
   
       // 4) Arrow for MONTH
       const monthArrowXPath = '/html/body/div[2]/div/div/div/div[2]/div[1]/button[1]';
-      const monthArrowBtn = await waitForXPath(monthArrowXPath, 5000);
+      const monthArrowBtn = await waitForXPath(monthArrowXPath, 1000);
       monthArrowBtn.click();
       console.log("Clicked arrow to show month list");
-      await sleep(500);
+      await sleep(200);
   
       // 5) monthsContainer
-      const monthsContainer = await waitForElement('.v-date-picker-months__content', 5000);
+      const monthsContainer = await waitForElement('.v-date-picker-months__content', 300);
       console.log("Found months container:", monthsContainer);
   
       // Build target month name
@@ -1057,25 +1064,25 @@ async function selectDate(dateObj) {
       }
       monthBtn.click();
       console.log(`Selected month: ${targetMonthName}`);
-      await sleep(1000);
+      await sleep(300);
   
       // 6) Finally pick the day via text
       await selectDayByText(dateObj.getDate());
       console.log("Day selection completed!");
-      await sleep(500);
+      await sleep(200);
   
     } catch (err) {
       console.error("Error selecting date:", err);
       throw err;
     }
   }
-    //---------------------------------------------------------
-    // DAY selection
-    //---------------------------------------------------------
+//     //---------------------------------------------------------
+//     // DAY selection
+//     //---------------------------------------------------------
 
 async function selectDayByText(targetDay) {
     // 1) Wait for the days container
-    const daysContainer = await waitForElement('.v-date-picker-month__days', 5000);
+    const daysContainer = await waitForElement('.v-date-picker-month__days', 300);
     console.log("Found days container:", daysContainer);
   
     // 2) Gather all .v-date-picker-month__day elements
@@ -1147,9 +1154,9 @@ function waitForElement(selector, timeout = 30000) {
   });
 }
 
-/**
- * waitForXPath - finds an element by XPATH
- */
+// /**
+//  * waitForXPath - finds an element by XPATH
+//  */
 function waitForXPath(xpath, timeout = 30000) {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
